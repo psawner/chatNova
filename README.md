@@ -17,8 +17,9 @@ A full-stack AI-powered chatbot application that allows users to register, authe
 - Voice Recognition: Converts user speech into text for AI interaction.
 
 4. User Information Management
-- Fetch User Info: User-specific data (like name, email etc.) is fetched from the backend for personalized experience.
+- Fetch User Info: User-specific data (like name, email etc.) is fetched from the backend for  personalized experience.
 - Profile Display: Dashboard can show user-specific details retrieved from backend APIs.
+
 
 
 ## Tech Stack
@@ -59,8 +60,5 @@ Make sure your frontend API calls point to http://localhost:4000.
 - Ask anything to the AI through the chat interface.
 - use voice-to-text for speech input.
 - User-specific information is displayed and fetched dynamically from the backend.
-
-## Future Enhancements
 - Multi-language support for text and voice.
 - Chat history and analytics for users.
-- Dark mode and responsive UI improvements.

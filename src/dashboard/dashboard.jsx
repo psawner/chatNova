@@ -1,5 +1,6 @@
 import styles from './dashboard.module.css'
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useLayoutEffect} from "react";
+import { useNavigate } from "react-router-dom";
 //import axios from 'axios'
 import ProfileModel from '../components/model';
 import EmojiPicker from "emoji-picker-react";
@@ -15,8 +16,19 @@ function Dashboard() {
     //----------------------scroll button functionality----------------------------------------------------
     const chatRef = useRef(null);
     const [showscroll, setshowscroll] = useState(false)
+
+    // auto-scroll after messages update
+    useLayoutEffect(() => {
+        if (chatRef.current && message.length > 0) {
+            chatRef.current.scrollTop = chatRef.current.scrollHeight;
+        }
+    }, [message]);
+
+
     const scrollToBottom = () => {
-        chatRef.current.scrollTop = chatRef.current.scrollHeight;
+        if (chatRef.current) {
+            chatRef.current.scrollTop = chatRef.current.scrollHeight;
+        }
     };
 
     const handlescroll = () => {
@@ -32,6 +44,7 @@ function Dashboard() {
 
 
     //----------------------user and bot responses-------------------------------------------------------------
+    const [sessionid, setsessionid] = useState(null);
     const send = async () => {
         if (!userinput.trim()) return;
         setmoved(true)
@@ -52,11 +65,14 @@ function Dashboard() {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`,
                 },
-                body: JSON.stringify({ message: usermessage })
+                body: JSON.stringify({ message: usermessage, session_id: sessionid })
             })
             const data = await res.json()
             if (res.ok) {
                 setmessage((prev) => [...prev, { type: 'bot', text: data.reply }])
+                if (!sessionid) {
+                    setsessionid(data.session_id)
+                }
             } else {
                 setmessage((prev) => [...prev, { type: 'bot', text: data.error }])
             }
@@ -114,33 +130,115 @@ function Dashboard() {
     const handleFileChange = (e) => {
         console.log("Selected file:", e.target.files[0]);
     };
-    
+
     //---------------------------voice to text conversion---------------------------------------------
     const voicerecognition = useRef(null)
     const startListening = () => {
         if (!("webkitSpeechRecognition" in window)) {
-          alert("Your browser does not support speech recognition");
-          return;
+            alert("Your browser does not support speech recognition");
+            return;
         }
-    
+
         const recognition = new window.webkitSpeechRecognition();
         recognition.continuous = false; // stop after user stops talking
         recognition.interimResults = false; // only final result
         recognition.lang = "en-US";
-    
+
         recognition.onresult = (event) => {
-          const transcript = event.results[0][0].transcript;
-          setuserinput(transcript); // put recognized text into input
+            const transcript = event.results[0][0].transcript;
+            setuserinput(transcript); // put recognized text into input
         };
-    
+
         recognition.onerror = (err) => {
-          console.error("Speech recognition error:", err);
+            console.error("Speech recognition error:", err);
         };
-    
+
         recognition.start();
         voicerecognition.current = recognition;
-      };
-      //---------------------------voice to text conversion---------------------------------------------
+    };
+    //---------------------------voice to text conversion---------------------------------------------
+
+
+    //----------------------------chat history---------------------------------------------------------
+    const [sessions, setsessions] = useState([]);
+
+    useEffect(() => {
+        const gettingsessions = async () => {
+            try {
+                const res = await fetch("http://localhost:4000/user/sessions/all", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    }
+                });
+
+                const data = await res.json();
+                setsessions(data.sessions);
+            } catch (err) {
+                console.error("error getting sessions", err);
+            }
+        }
+        gettingsessions();
+    }, [])
+    //----------------------------chat history---------------------------------------------------------
+
+
+
+    //------------------------------- loading entire session----------------------------------------------------
+
+    const loadsession = async (id) => {
+        setmoved(true);
+        setloading(true);
+
+        try {
+            const res = await fetch(`http://localhost:4000/user/${id}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                }
+            });
+
+            const data = await res.json();
+            const formatted = data.messages.map(m => ({
+                type: m.role === 'user' ? 'user' : 'bot',
+                text: m.message
+            }));
+
+            setmessage(formatted);
+            setsessionid(id); // update sessionid to this session
+
+        } catch (err) {
+            console.error("Failed to load session", err);
+        } finally {
+            setloading(false);
+        }
+    }
+    
+    //------------------------------- loading entire session----------------------------------------------------
+
+    //-----------------------------------logout-----------------------------------------------------------------
+    
+    const navigate = useNavigate()
+    const logout = async ()=>{
+        try{
+            const res = await fetch('http://localhost:4000/user/signout', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                }
+            });
+
+            localStorage.removeItem("token")
+            navigate('/login');
+        }catch(err){
+            console.error("logout", err);
+        }
+    }
+
+    //------------------------------------------logout--------------------------------------------------------------
 
 
     return (
@@ -177,12 +275,19 @@ function Dashboard() {
                     </div>
                     <div className={styles.history_content}>
                         <h4>History</h4>
-                        <div className={styles.history}></div>
+                        <div className={styles.history}>
+                            <ul>
+                                {sessions.map((session) => (
+                                    <li key={session.session_id} onClick={() => loadsession(session.session_id)}> {session.first_message} </li>
+                                ))}
+                            </ul>
+                        </div>
                     </div>
                     <div className={styles.sidebar_bottom}>
                         <ul>
                             <li><i class="fa-solid fa-gear"></i> Settings</li>
                             <li onClick={() => setshowprofile(true)}><i class="fa-solid fa-user"></i> Profile</li>
+                            <li onClick={logout}><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</li>
                         </ul>
                     </div>
                 </aside>

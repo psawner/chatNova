@@ -8,9 +8,11 @@ const jwtAuthMiddleware = require('../middleware/jwt')
 
 const bcrypt = require('bcrypt')
 
+//for storing session chat
+const {v4: uuidv4} = require('uuid')
+
 const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 
 
 router.post('/signup',async(req,res)=>{
@@ -98,15 +100,53 @@ router.get('/profileimage',jwtAuthMiddleware,async(req,res)=>{
 
 router.post('/ask', jwtAuthMiddleware, async (req,res)=>{
     try{
-        const userinput = req.body.message
+        const userid = req.user.id
+        const {message,session_id} = req.body
+
+        const create_id = session_id || uuidv4()
+
+        await user.createMessage(userid,create_id,'user',message)
+
         const result = await ai.models.generateContent({
             model: "gemini-2.0-flash",
-            contents: userinput,
+            contents: message,
         })
-        res.status(200).json({reply: result.text})
+        
+        await user.createMessage(userid,create_id,'bot',result.text)
+        res.status(200).json({reply: result.text, session_id:create_id})
     }catch(err){
         res.status(500).json({error: "something went wrong"})
     }
 })
+
+// getting entire chat of a specific session
+router.get('/:session_id',jwtAuthMiddleware,async(req,res)=>{
+    try{
+        const userid = req.user.id
+        const sessionid = req.params.session_id
+        
+        const messages = await user.getMessage(userid,sessionid)
+        res.status(200).json({messages})
+    }catch(err){
+        res.status(500).json({error: "something went wrong"})
+    }
+})
+
+// getting all sessions
+router.get('/sessions/all',jwtAuthMiddleware,async(req,res)=>{
+    try{
+        const userid = req.user.id
+        const sessions = await user.getAllSession(userid)
+        res.status(200).json({sessions})
+    }catch(err){
+        res.status(500).json({error: "something went wrong"})
+    }
+})
+
+// logout router
+router.post('/signout',(req,res)=>{
+    res.json({message:'logout successful'});
+})
+
 
 module.exports = router

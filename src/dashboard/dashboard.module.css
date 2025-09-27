@@ -110,8 +110,24 @@
 
 .history{
     margin-top: 10px;
-    background: #b85d8f;
     border-radius: 5px;
+    flex:1;
+    overflow-y: auto;
+}
+
+.history ul li{
+    padding: 5px;
+    overflow:hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    
+}
+
+.history ul li:hover{
+    background-color: rgb(196, 187, 187);
+    cursor: pointer;
+    border-radius: 4px;
+    color: black;
 }
 
 .sidebar_bottom ul li{
