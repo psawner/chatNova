@@ -62,3 +62,30 @@ Make sure your frontend API calls point to http://localhost:4000.
 - User-specific information is displayed and fetched dynamically from the backend.
 - Multi-language support for text and voice.
 - Chat history and analytics for users.
+
+
+
+
+## screeshots
+
+### Login and Registration Pages
+![Login Page](https://github.com/psawner/chatNova/blob/main/screenshots/login.png)
+
+![Registration Page](https://github.com/psawner/chatNova/blob/main/screenshots/registration.png)
+
+### Dashboard Page
+![Dashboard Page](https://github.com/psawner/chatNova/blob/main/screenshots/dashboard.png)
+![Dashboard1 Page](https://github.com/psawner/chatNova/blob/main/screenshots/dashboard1.png)
+![Dashboard2 Page](https://github.com/psawner/chatNova/blob/main/screenshots/dashboard2.png)
+![Dashboard3 Page](https://github.com/psawner/chatNova/blob/main/screenshots/dashboard3.png)
+![Dashboard4 Page](https://github.com/psawner/chatNova/blob/main/screenshots/dashboard4.png)
+
+![Responsive](https://github.com/psawner/chatNova/blob/main/screenshots/responsive.png)
+![Responsive1](https://github.com/psawner/chatNova/blob/main/screenshots/responsive1.png)
+![Responsive2](https://github.com/psawner/chatNova/blob/main/screenshots/responsive2.png)
+
+
+
+
+
+
