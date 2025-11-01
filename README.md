@@ -80,6 +80,7 @@ Make sure your frontend API calls point to http://localhost:4000.
 ![Dashboard3 Page](https://github.com/psawner/chatNova/blob/main/screenshots/dashboard3.png)
 ![Dashboard4 Page](https://github.com/psawner/chatNova/blob/main/screenshots/dashboard4.png)
 
+![Responsive3](https://github.com/psawner/chatNova/blob/main/screenshots/responsive3.png)
 ![Responsive](https://github.com/psawner/chatNova/blob/main/screenshots/responsive.png)
 ![Responsive1](https://github.com/psawner/chatNova/blob/main/screenshots/responsive1.png)
 ![Responsive2](https://github.com/psawner/chatNova/blob/main/screenshots/responsive2.png)
